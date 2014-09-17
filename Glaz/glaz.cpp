@@ -1,27 +1,32 @@
-// dołączenie plików nagłówkowych
 #include <shaders.h>
 #include <vecmatrix.h>
 #include <vectors.h>
 #include <obj.h>
-
-// Załadowanie pliku nagłówkowego biblioteki GLEW - znajdują się w nim wszystkie
-// rozszerzenia biblioteki OpenGL również dla wersji wyższych niż 3.0
-// Nie ma więc potrzeby wykorzysytwania pliku nagłówkowego gl3.h
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <GL/gl.h>
 #include <iostream>
+#include <string.h>
 
 using namespace std;
 
 // ustawienia parametrów perspektywy
-GLfloat prScale = 1.0, prNear = 0.1f, prFar = 45.0f;
+GLfloat prScale = 4.0f, prNear = 0.1f, prFar = 45.0f;
 
 // identyfikator obiektu programu
 GLuint simplyShader, ambientShader;
 
 // identyfikatory obiektów tablic wierchołków dla .obj i sześcianu
 GLuint cubeVertexArray, objVertexArray;
+
+GLfloat redColor[4] = {1.0f, 0.0f, 0.0f, 1.0f};
+GLfloat greenColor[4] = {0.0f, 1.0f, 0.0f, 1.0f};
+GLfloat blueColor[4] = {0.0f, 0.0f, 1.0f, 1.0f};
+GLfloat yellowColor[4] = {1.0f, 1.0f, 0.0f, 1.0f};
+GLfloat cyanColor[4] = {0.0f, 1.0f, 1.0f, 1.0f};
+GLfloat magentaColor[4] = {1.0f, 0.0f, 1.0f, 1.0f};
+
+GLfloat objectColor[4];
 
 // obiekty reprezentujące odpowiednio macierz widoku modelu i projekcji (rzutowania)
 matrix modelView(4);
@@ -30,9 +35,11 @@ matrix projection(4);
 // początkowe wartości wektora przesunięcia
 GLfloat translWorld[3] = {0.0f, 0.0f, -2.0f};
 // początkowe wartości kątów obrotów sześcianu wokół odpowiednich osi
-GLfloat angX = 0.0f, angY = 0.0f, angZ = 0.0f;
+GLfloat angX = -2.5f, angY = 0.0f, angZ = 3.0f;
 // początkowe wartości kątów obrotów świata (sceny) wokół odpowiednich osi
 GLfloat angWorldX = 0.0f, angWorldY = 0.0f, angWorldZ = 0.0f;
+
+GLfloat transObject[3] = {0.0f, 0.0f, 0.0f};
 
 matrixStack modelViewStack;
 
@@ -83,42 +90,42 @@ int init(char *objFileName)
 {
 //   definicja sześchar *objFileNamecianu:
 // wierzchołki
-GLfloat cubeVertices[3*8] = {
-	-0.5f, -0.5f,  0.5f,
-	 0.5f, -0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	-0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	-0.5f,  0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f
-};
-// normalne
-GLfloat cubeNormals[3*8] = {
-	-1.0f, -1.0f,  1.0f,
-	 1.0f, -1.0f,  1.0f,
-	-1.0f,  1.0f,  1.0f,
-	 1.0f,  1.0f,  1.0f,
-	-1.0f, -1.0f, -1.0f,
-	 1.0f, -1.0f, -1.0f,
-	-1.0f,  1.0f, -1.0f,
-	 1.0f,  1.0f, -1.0f
-};
-// indeksy
-GLuint cubeIndices[3*6*2] = {
-	0, 1, 2,
-	2, 1, 3,
-	1, 5, 3,
-	3, 5, 7,
-	5, 4, 7,
-	7, 4, 6,
-	4, 0, 6,
-	6, 0, 2,
-	1, 0, 5,
-	5, 0, 4,
-	3, 7, 2,
-	2, 7, 6
-};
+// GLfloat cubeVertices[3*8] = {
+// 	-0.5f, -0.5f,  0.5f,
+// 	 0.5f, -0.5f,  0.5f,
+// 	-0.5f,  0.5f,  0.5f,
+// 	 0.5f,  0.5f,  0.5f,
+// 	-0.5f, -0.5f, -0.5f,
+// 	 0.5f, -0.5f, -0.5f,
+// 	-0.5f,  0.5f, -0.5f,
+// 	 0.5f,  0.5f, -0.5f
+// };
+// // normalne
+// GLfloat cubeNormals[3*8] = {
+// 	-1.0f, -1.0f,  1.0f,
+// 	 1.0f, -1.0f,  1.0f,
+// 	-1.0f,  1.0f,  1.0f,
+// 	 1.0f,  1.0f,  1.0f,
+// 	-1.0f, -1.0f, -1.0f,
+// 	 1.0f, -1.0f, -1.0f,
+// 	-1.0f,  1.0f, -1.0f,
+// 	 1.0f,  1.0f, -1.0f
+// };
+// // indeksy
+// GLuint cubeIndices[3*6*2] = {
+// 	0, 1, 2,
+// 	2, 1, 3,
+// 	1, 5, 3,
+// 	3, 5, 7,
+// 	5, 4, 7,
+// 	7, 4, 6,
+// 	4, 0, 6,
+// 	6, 0, 2,
+// 	1, 0, 5,
+// 	5, 0, 4,
+// 	3, 7, 2,
+// 	2, 7, 6
+// };
 
 	int objError;
 
@@ -177,11 +184,11 @@ GLuint cubeIndices[3*6*2] = {
 	LinkProgram(ambientShader);
 
 	// wygenerowanie i włączenie tablicy wierzchołków sześcianu
-	glGenVertexArrays(1, &cubeVertexArray);
-	createVertexArray(cubeVertexArray,
-		cubeVertices, sizeof(cubeVertices),
-		cubeNormals, sizeof(cubeNormals),
-		cubeIndices, sizeof(cubeIndices));
+	// glGenVertexArrays(1, &cubeVertexArray);
+	// createVertexArray(cubeVertexArray,
+	// 	cubeVertices, sizeof(cubeVertices),
+	// 	cubeNormals, sizeof(cubeNormals),
+	// 	cubeIndices, sizeof(cubeIndices));
 
 	// wygenerowanie i włączenie tablicy wierzchołków .obj
 	glGenVertexArrays(1, &objVertexArray);
@@ -193,12 +200,12 @@ GLuint cubeIndices[3*6*2] = {
 	// włączenie wykorzystania bufora głębokości
 	glEnable(GL_DEPTH_TEST);
 
-	// ustawienie sposobu rysowania odpowiednich stron ścian
-	glPolygonMode(GL_FRONT, GL_FILL);
-	glPolygonMode(GL_BACK, GL_LINE);
+	// // ustawienie sposobu rysowania odpowiednich stron ścian
+	// glPolygonMode(GL_FRONT, GL_FILL);
+	// glPolygonMode(GL_BACK, GL_LINE);
 
-	// właczenie pominięcia renderowania niewidocznych ścian
-	glEnable(GL_CULL_FACE);
+	// // właczenie pominięcia renderowania niewidocznych ścian
+	// glEnable(GL_CULL_FACE);
 
 	return 0;
 }
@@ -222,13 +229,6 @@ void reshape(int width, int height)
 //=============================================================================
 void display(void)
 {
-	GLfloat redColor[4] = {1.0f, 0.0f, 0.0f, 1.0f};
-	GLfloat greenColor[4] = {0.0f, 1.0f, 0.0f, 1.0f};
-	GLfloat blueColor[4] = {0.0f, 0.0f, 1.0f, 1.0f};
-	GLfloat yellowColor[4] = {1.0f, 1.0f, 0.0f, 1.0f};
-	GLfloat cyanColor[4] = {0.0f, 1.0f, 1.0f, 1.0f};
-	GLfloat magentaColor[4] = {1.0f, 0.0f, 1.0f, 1.0f};
-
 	// czyszczenie bufora koloru
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
@@ -260,22 +260,22 @@ void display(void)
 	modelView.rotate(angWorldZ, 0.0f, 0.0f, 1.0f);
 	modelView.translate(translWorld[0], translWorld[1], translWorld[2]);
 
-	modelViewStack.put(&modelView);
-	modelView.translate(-1.0f, 0.0f, 0.0f);
-	modelView.rotate(angX, 1.0f, 0.0f, 0.0f);
-	modelView.rotate(angY, 0.0f, 1.0f, 0.0f);
-	modelView.rotate(angZ, 0.0f, 0.0f, 1.0f);
+	// modelViewStack.put(&modelView);
+	// modelView.translate(-1.0f, 0.0f, 0.0f);
+	// modelView.rotate(angX, 1.0f, 0.0f, 0.0f);
+	// modelView.rotate(angY, 0.0f, 1.0f, 0.0f);
+	// modelView.rotate(angZ, 0.0f, 0.0f, 1.0f);
 
 	// włączenie tablicy wierzchołków sześcianu
-	glBindVertexArray(cubeVertexArray);
+	//glBindVertexArray(cubeVertexArray);
 	// załadownanie do shadera bieżącego stanu macierzy widoku modelu
-	glUniformMatrix4fv(glGetUniformLocation(simplyShader, "modelViewMatrix"), 1, GL_TRUE, modelView.get());
+	//glUniformMatrix4fv(glGetUniformLocation(simplyShader, "modelViewMatrix"), 1, GL_TRUE, modelView.get());
 	// załadowanie do shadera wektora koloru obiektu
-	glUniform4fv(glGetUniformLocation(simplyShader, "inColor"), 1, redColor);
+	glUniform4fv(glGetUniformLocation(simplyShader, "inColor"), 1, objectColor);
 
 	// narysowanie danych zawartych w tablicy
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glDrawElements(GL_TRIANGLES, 3*6*2, GL_UNSIGNED_INT, 0);
+	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	// glDrawElements(GL_TRIANGLES, 3*6*2, GL_UNSIGNED_INT, 0);
 
 	// włączenie tablicy wierzchołków .obj
 	glBindVertexArray(objVertexArray);
@@ -284,20 +284,20 @@ void display(void)
 	glDrawElements(GL_TRIANGLES, 3*obj.nFaces, GL_UNSIGNED_INT, 0);
 
 	// pobranie macierzy widoku modelu ze stosu
-	modelViewStack.pop(&modelView);
+	// modelViewStack.pop(&modelView);
 
 	modelViewStack.put(&modelView);
-	modelView.translate(1.0f, 0.0f, 0.0f);
+	modelView.translate(transObject[0], transObject[1], transObject[2]);
 	modelView.rotate(angX, 1.0f, 0.0f, 0.0f);
 	modelView.rotate(angY, 0.0f, 1.0f, 0.0f);
 	modelView.rotate(angZ, 0.0f, 0.0f, 1.0f);
 
 	// włączenie tablicy wierzchołków sześcianu
-	glBindVertexArray(cubeVertexArray);
+	// glBindVertexArray(cubeVertexArray);
 	// załadownanie do shadera bieżącego stanu macierzy widoku modelu
 	glUniformMatrix4fv(glGetUniformLocation(simplyShader, "modelViewMatrix"), 1, GL_TRUE, modelView.get());
 	// załadowanie do shadera wektora koloru obiektu
-	glUniform4fv(glGetUniformLocation(simplyShader, "inColor"), 1, blueColor);
+	//glUniform4fv(glGetUniformLocation(simplyShader, "inColor"), 1, blueColor);
 
 	// narysowanie danych zawartych w tablicy
 	glPolygonMode(GL_FRONT, GL_FILL);
@@ -332,10 +332,10 @@ void standardKbd(unsigned char key, int x, int y)
 	// obsługa standardowych klawiszy
 	switch (key) {
 		// zdefiniowanie współczynnika skalowania dla perspectywy
-		case 'a': prScale += 0.1f;
+		case 'q': prScale += 0.1f;
 			reshape(viewport[2], viewport[3]);
 			break;
-		case 'A': prScale -= 0.1f;
+		case 'Q': prScale -= 0.1f;
 			reshape(viewport[2], viewport[3]);
 			break;
 		// zdefiniowanie obrotów całej sceny (świata) wokół osi x, y, z
@@ -351,7 +351,7 @@ void standardKbd(unsigned char key, int x, int y)
 			break;
 		case 'L': angWorldZ -= 0.1f;
 			break;
-		// zdefiniowanie obrotów sześcianu wokół osi x, y, z
+		// zdefiniowanie obrotów obj wokół osi x, y, z
 		case 'x': angX += 0.1f;
 			break;
 		case 'X': angX -= 0.1f;
@@ -363,6 +363,38 @@ void standardKbd(unsigned char key, int x, int y)
 		case 'z': angZ += 0.1f;
 			break;
 		case 'Z': angZ -= 0.1f;
+			break;
+		// zmiana kolorow
+		case '1': memcpy(objectColor, redColor, sizeof(objectColor));
+			break;
+		case '2': memcpy(objectColor, blueColor, sizeof(objectColor));
+			break;
+		case '3': memcpy(objectColor, greenColor, sizeof(objectColor));
+			break;
+		case '4': memcpy(objectColor, yellowColor, sizeof(objectColor));
+			break;
+		case '5': memcpy(objectColor, magentaColor, sizeof(objectColor));
+			break;
+		case '6': memcpy(objectColor, cyanColor, sizeof(objectColor));
+			break;
+		// ruchy obiektu
+		case 'd':
+			transObject[0] += 0.05f;
+			break;
+		case 'a':
+			transObject[0] -= 0.05f;
+			break;
+		case 'w':
+			transObject[1] += 0.05f;
+			break;
+		case 's':
+			transObject[1] -= 0.05f;
+			break;
+		case 'r':
+			transObject[2] += 0.05f;
+			break;
+		case 'f':
+			transObject[2] -= 0.05f;
 			break;
 		case 27: exit(0);
 	}
@@ -404,6 +436,7 @@ int main(int argc, char** argv)
 		cout << "   " << argv[0] << " <obj file>" << endl;
 		return 1;
 	}
+	memcpy(objectColor, redColor, sizeof(objectColor));
 
 	// ustalenie odpowiedniego kontekstu renderowania
 	glutInitContextVersion(3, 1);
@@ -419,7 +452,7 @@ int main(int argc, char** argv)
 	// położenie okna na ekranie (względem lewego dolnego rogu)
 	glutInitWindowPosition(100, 100);
 	// stworzenie okna programu
-	glutCreateWindow("03 - oświetlone kostki ruchomym światłem");
+	glutCreateWindow("Glaz - projekt");
 
 	// inicjalizacja biblioteki GLEW
 	glewExperimental = GL_TRUE;
