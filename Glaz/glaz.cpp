@@ -90,42 +90,42 @@ int init(char *objFileName)
 {
 //   definicja sześchar *objFileNamecianu:
 // wierzchołki
-// GLfloat cubeVertices[3*8] = {
-// 	-0.5f, -0.5f,  0.5f,
-// 	 0.5f, -0.5f,  0.5f,
-// 	-0.5f,  0.5f,  0.5f,
-// 	 0.5f,  0.5f,  0.5f,
-// 	-0.5f, -0.5f, -0.5f,
-// 	 0.5f, -0.5f, -0.5f,
-// 	-0.5f,  0.5f, -0.5f,
-// 	 0.5f,  0.5f, -0.5f
-// };
-// // normalne
-// GLfloat cubeNormals[3*8] = {
-// 	-1.0f, -1.0f,  1.0f,
-// 	 1.0f, -1.0f,  1.0f,
-// 	-1.0f,  1.0f,  1.0f,
-// 	 1.0f,  1.0f,  1.0f,
-// 	-1.0f, -1.0f, -1.0f,
-// 	 1.0f, -1.0f, -1.0f,
-// 	-1.0f,  1.0f, -1.0f,
-// 	 1.0f,  1.0f, -1.0f
-// };
-// // indeksy
-// GLuint cubeIndices[3*6*2] = {
-// 	0, 1, 2,
-// 	2, 1, 3,
-// 	1, 5, 3,
-// 	3, 5, 7,
-// 	5, 4, 7,
-// 	7, 4, 6,
-// 	4, 0, 6,
-// 	6, 0, 2,
-// 	1, 0, 5,
-// 	5, 0, 4,
-// 	3, 7, 2,
-// 	2, 7, 6
-// };
+GLfloat cubeVertices[3*8] = {
+	-0.1f, -0.1f,  0.1f,
+	 0.1f, -0.1f,  0.1f,
+	-0.1f,  0.1f,  0.1f,
+	 0.1f,  0.1f,  0.1f,
+	-0.1f, -0.1f, -0.1f,
+	 0.1f, -0.1f, -0.1f,
+	-0.1f,  0.1f, -0.1f,
+	 0.1f,  0.1f, -0.1f
+};
+// normalne
+GLfloat cubeNormals[3*8] = {
+	-1.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f,  1.0f,
+	-1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	-1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+	 1.0f,  1.0f, -1.0f
+};
+// indeksy
+GLuint cubeIndices[3*6*2] = {
+	0, 1, 2,
+	2, 1, 3,
+	1, 5, 3,
+	3, 5, 7,
+	5, 4, 7,
+	7, 4, 6,
+	4, 0, 6,
+	6, 0, 2,
+	1, 0, 5,
+	5, 0, 4,
+	3, 7, 2,
+	2, 7, 6
+};
 
 	int objError;
 
@@ -184,11 +184,11 @@ int init(char *objFileName)
 	LinkProgram(ambientShader);
 
 	// wygenerowanie i włączenie tablicy wierzchołków sześcianu
-	// glGenVertexArrays(1, &cubeVertexArray);
-	// createVertexArray(cubeVertexArray,
-	// 	cubeVertices, sizeof(cubeVertices),
-	// 	cubeNormals, sizeof(cubeNormals),
-	// 	cubeIndices, sizeof(cubeIndices));
+	glGenVertexArrays(1, &cubeVertexArray);
+	createVertexArray(cubeVertexArray,
+		cubeVertices, sizeof(cubeVertices),
+		cubeNormals, sizeof(cubeNormals),
+		cubeIndices, sizeof(cubeIndices));
 
 	// wygenerowanie i włączenie tablicy wierzchołków .obj
 	glGenVertexArrays(1, &objVertexArray);
@@ -201,11 +201,11 @@ int init(char *objFileName)
 	glEnable(GL_DEPTH_TEST);
 
 	// // ustawienie sposobu rysowania odpowiednich stron ścian
-	// glPolygonMode(GL_FRONT, GL_FILL);
-	// glPolygonMode(GL_BACK, GL_LINE);
+	glPolygonMode(GL_FRONT, GL_FILL);
+	glPolygonMode(GL_BACK, GL_LINE);
 
 	// // właczenie pominięcia renderowania niewidocznych ścian
-	// glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 
 	return 0;
 }
@@ -260,11 +260,11 @@ void display(void)
 	modelView.rotate(angWorldZ, 0.0f, 0.0f, 1.0f);
 	modelView.translate(translWorld[0], translWorld[1], translWorld[2]);
 
-	// modelViewStack.put(&modelView);
-	// modelView.translate(-1.0f, 0.0f, 0.0f);
-	// modelView.rotate(angX, 1.0f, 0.0f, 0.0f);
-	// modelView.rotate(angY, 0.0f, 1.0f, 0.0f);
-	// modelView.rotate(angZ, 0.0f, 0.0f, 1.0f);
+	modelViewStack.put(&modelView);
+	modelView.translate(transObject[0], transObject[1], transObject[2]);
+	modelView.rotate(angX, 1.0f, 0.0f, 0.0f);
+	modelView.rotate(angY, 0.0f, 1.0f, 0.0f);
+	modelView.rotate(angZ, 0.0f, 0.0f, 1.0f);
 
 	// włączenie tablicy wierzchołków sześcianu
 	//glBindVertexArray(cubeVertexArray);
@@ -272,10 +272,11 @@ void display(void)
 	//glUniformMatrix4fv(glGetUniformLocation(simplyShader, "modelViewMatrix"), 1, GL_TRUE, modelView.get());
 	// załadowanie do shadera wektora koloru obiektu
 	glUniform4fv(glGetUniformLocation(simplyShader, "inColor"), 1, objectColor);
+	glUniformMatrix4fv(glGetUniformLocation(simplyShader, "modelViewMatrix"), 1, GL_TRUE, modelView.get());
 
 	// narysowanie danych zawartych w tablicy
-	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	// glDrawElements(GL_TRIANGLES, 3*6*2, GL_UNSIGNED_INT, 0);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glDrawElements(GL_TRIANGLES, 3*6*2, GL_UNSIGNED_INT, 0);
 
 	// włączenie tablicy wierzchołków .obj
 	glBindVertexArray(objVertexArray);
@@ -284,20 +285,20 @@ void display(void)
 	glDrawElements(GL_TRIANGLES, 3*obj.nFaces, GL_UNSIGNED_INT, 0);
 
 	// pobranie macierzy widoku modelu ze stosu
-	// modelViewStack.pop(&modelView);
+	modelViewStack.pop(&modelView);
 
 	modelViewStack.put(&modelView);
-	modelView.translate(transObject[0], transObject[1], transObject[2]);
+	modelView.translate(0.0f, 0.0f, 0.0f);
 	modelView.rotate(angX, 1.0f, 0.0f, 0.0f);
 	modelView.rotate(angY, 0.0f, 1.0f, 0.0f);
 	modelView.rotate(angZ, 0.0f, 0.0f, 1.0f);
 
 	// włączenie tablicy wierzchołków sześcianu
-	// glBindVertexArray(cubeVertexArray);
+	glBindVertexArray(cubeVertexArray);
 	// załadownanie do shadera bieżącego stanu macierzy widoku modelu
 	glUniformMatrix4fv(glGetUniformLocation(simplyShader, "modelViewMatrix"), 1, GL_TRUE, modelView.get());
 	// załadowanie do shadera wektora koloru obiektu
-	//glUniform4fv(glGetUniformLocation(simplyShader, "inColor"), 1, blueColor);
+	glUniform4fv(glGetUniformLocation(simplyShader, "inColor"), 1, blueColor);
 
 	// narysowanie danych zawartych w tablicy
 	glPolygonMode(GL_FRONT, GL_FILL);
@@ -385,16 +386,16 @@ void standardKbd(unsigned char key, int x, int y)
 			transObject[0] -= 0.05f;
 			break;
 		case 'w':
-			transObject[1] += 0.05f;
+			transObject[2] -= 0.05f;
 			break;
 		case 's':
-			transObject[1] -= 0.05f;
-			break;
-		case 'r':
 			transObject[2] += 0.05f;
 			break;
+		case 'r':
+			transObject[1] += 0.05f;
+			break;
 		case 'f':
-			transObject[2] -= 0.05f;
+			transObject[1] -= 0.05f;
 			break;
 		case 27: exit(0);
 	}
